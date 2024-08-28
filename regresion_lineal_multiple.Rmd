@@ -1,0 +1,316 @@
+---
+title: 'Actividad 1: Mod. Estad. para la Toma Decisiones'
+author: "Cristian Sarmiento"
+date: "2024-08-07"
+output:
+  html_document:
+    df_print: paged
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, include=FALSE}
+library(paqueteMETODOS)
+library(lmtest)
+library(stargazer)
+library(dplyr)
+library(mice)
+library(visdat)
+library(ggplot2)
+library(reshape2)
+data(vivienda)
+```
+
+## 1. Informe
+
+### 1.1. Introducción
+
+El mercado de viviendas urbanas es un sector complejo y dinámico que se encuentra en constante evolución. Para tener éxito en este mercado, las empresas inmobiliarias necesitan comprender en profundidad las tendencias del mercado, las necesidades de los clientes y la competencia.
+
+En este informe, se presenta un análisis del mercado de viviendas urbanas en Cali. El análisis se basa en información detallada sobre diversas propiedades residenciales disponibles en el mercado de la ciudad de Cali. Se aplicarán diversas técnicas estadísticas para poder extraer conclusiones relevantes para el cliente.
+
+## 2. Preprocesamiento de información
+
+Se realiza un primer análisis exploratorio de la base de datos. Este análisis se estructurará en la identificación de las columnas y dimensiones de la tabla, lo segundo será identificar los tipos de datos de las columnas y seleccionar cuáles serán relevantes para el análisis. Lo tercero será realizar la identificación de valores perdidos dentro de las columnas seleccionadas para el análisis y brindar posibles propuestas para poder solucionar los datos faltantes. Con la realización de estos pasos se puede determinar la relación de algunas variables con respecto a los objetivos del presente informe.
+
+### 2.1 Cargue de base de datos
+
+```{r head_data}
+head(vivienda)
+cat("Cantidad columnas: ", ncol(vivienda), "Cantidad filas: ", nrow(vivienda))
+```
+
+### 2.2 Selección de datos relevantes
+
+Según los objetivos del estudio, se identifican como variables relevantes zona, barrio, tipo como variables categóricas. Para análisis de variables numéricas se selecciona principalmente la variable preciom, como variables para análisis de caraterísticas se seleccionan piso, estrato, areaconst, banios, habitac. A continuación se realiza una verificación de datos categóricos relevantes:
+
+```{r selecction_data}
+
+# Vector con los nombres de las columnas a analizar
+columnas_interes <- c("zona", "piso", "tipo", "estrato")
+
+# Bucle for para iterar sobre cada columna
+for (columna in columnas_interes) {
+  valores_unicos <- unique(vivienda[[columna]])
+  print(paste0("Valores únicos para ", columna, ": ", paste0(valores_unicos, collapse = ", ")))
+}
+      
+# Generando vector para resumir las columnas seleccionadas
+specific_columns <- c("preciom", "parqueaderos", "areaconst", "banios", "habitaciones")
+summary(vivienda[, specific_columns])
+
+```
+
+### 2.3 Limpieza de datos
+
+Se evidencia que vienen valores de id con vacíos, para lo cual es necesario quitarlos de la base de datos:
+
+```{r clean_data_2}
+faltantes_id = sum(is.na(vivienda$id))
+cat("Cantidad de id faltantes:", faltantes_id)
+## Se remueven los id vacios de la tabla:
+vivienda = subset(vivienda, !is.na(id))
+cat("Nueva cantidad filas: ", nrow(vivienda))
+```
+
+También se realiza la verificación de datos duplicados dentro de la tabla provista:
+
+```{r clean_data_1}
+duplicates <- duplicated(vivienda)
+n_duplicates <- sum(duplicates)
+cat("Cantidad de filas duplicadas: ", n_duplicates)
+
+## Se remueven los duplicados encontrados:
+vivienda <- unique(vivienda)
+cat("Nueva cantidad filas: ", nrow(vivienda))
+```
+
+Con lo identificado en la selección de variables se realiza la limpieza de las columnas de tipo, zona y barrio. Adicionalmente, al haber identificado un valor de "APTO" en la columna zona, esta se unifica con "APARTAMENTO" para normalizar los datos.
+
+```{r clean_data_3}
+
+upper_cols <- c("zona", "barrio", "tipo")
+
+for (col in upper_cols) {
+  vivienda[[col]] <- toupper(vivienda[[col]])
+}
+
+head(vivienda[, upper_cols])
+
+```
+
+### 2.4 Identificación de faltantes
+
+```{r show_faltantes}
+## uses visdat
+vis_miss(vivienda)
+```
+
+Haciendo uso de la librería `visdat` se logra identificar que dentro de la tabla dispuesta, después de la limpieza se tiene 3.9 % de datos faltantes. Todos distribuidos en las columnas `parqueaderos` y `piso`.
+
+```{r show_faltantes_mice}
+## uses visdat
+md.pattern(vivienda, rotate.names = TRUE)
+```
+
+### 2.5 Estrategias para mitigar datos faltantes
+
+La primera posible solución para poder trabajar con los datos de la forma más completa posible puede ser precindir de usar las variables `parqueaderos` y `piso`. Esta estrategia tiene como ventaja que puede ser de las más rápidas de implementar, así como reducir la dimensionalidad de los datos, con lo que aplicar algunos algoritmos puede llegar a ser más eficiente. Así mismo, la reducción de información dentro de la tabla puede generar eliminación de información importante, lo que puede conllevar a presentar sesgo en el resultado.
+
+#### 2.5.1 Análisis de faltantes en la variable PARQUEADEROS
+
+```{r}
+vivienda %>% count(parqueaderos)
+```
+
+Entendiendo el contexto, y que no existen valores de 0 dentro de la información que tenemos, es prudente asumir que existen viviendas que no tienen parqueaderos, por lo cual se procede a inputar el valor de 0 en los missing values
+
+```{r}
+vivienda <- vivienda %>% mutate(parqueaderos = ifelse(is.na(parqueaderos), 0, parqueaderos))
+```
+
+#### 2.5.2 Análisis de faltantes en la variable PISO
+
+Se supone una correlación entre la variable piso con la variable tipo de vivienda. En las variables casa, no tendría sentido tener el piso en el que se encuentra ubicada la casa (como sí lo tendría en un apartamento). Así que se propone realizar la revisión. A menos de que se trate de la cantidad de pisos de una vivienda. Se procede a reemplazar los valores de la mediana por tipo
+
+```{r}
+# Convertir a numérico
+vivienda$piso <- as.numeric(vivienda$piso)
+
+# reemplazar valores por mediana por tipo: CASA
+only_casas <- subset(vivienda, vivienda$tipo == "CASA")
+median_casa_piso = median(only_casas$piso)
+vivienda <- vivienda %>% mutate(piso = ifelse(is.na(piso) & tipo == "CASA", median_casa_piso, piso))
+
+# reemplazar valores por mediana por tipo: CASA
+only_apto <- subset(vivienda, vivienda$tipo == "APARTAMENTO")
+median_apt_piso = median(only_apto$piso)
+vivienda <- vivienda %>% mutate(piso = ifelse(is.na(piso) & tipo == "APARTAMENTO", median_apt_piso, piso))
+
+```
+
+verificación de dataset completo:
+
+```{r}
+## uses visdat
+vis_miss(vivienda)
+```
+
+### 2.6 Correlación de variables:
+
+Encoding de variables para hallar matrices de correlación:
+
+```{r}
+vivienda$zona_num <- as.integer(factor(vivienda$zona))
+vivienda$tipo_num <- as.integer(factor(vivienda$tipo))
+vivienda$barrio_num <- as.integer(factor(vivienda$barrio))
+```
+
+Con el dataframe codificado se procede a realizar una matriz de correlación para hallar la relación entre los valores
+
+
+```{r}
+library(psych)
+enc_vivienda <- vivienda[, !names(vivienda) %in% c("barrio", "zona", "tipo")]
+correlacion <- round(cor(enc_vivienda), 1)
+corPlot(correlacion, number.cex = 0.5)
+```
+
+## 3. Análisis de Componentes Principales
+
+El Análisis de Componentes Principales (ACP) es una técnica estadística utilizada en el análisis de datos. Su principal objetivo es reducir la dimensionalidad de un conjunto de datos mientras se conserva la mayor cantidad posible de varianza.
+
+```{r}
+## Se seleccionan las variables que se van a utilizar dentro del ACP
+selected_vars <- c("piso", "estrato", "preciom", "areaconst", "parqueaderos", "banios","habitaciones", "zona_num", "tipo_num")
+selected_vivienda <- vivienda[, selected_vars]
+
+## Reescalar las variables seleccionadas
+scale_vivienda <- scale(selected_vivienda)
+```
+
+Generación de los componentes principales haciendo uso de la librería `PCA`
+
+```{r}
+library(FactoMineR)
+library(factoextra)
+res.ACP <- PCA(scale_vivienda, graph = FALSE)
+
+## Verficación de valores propios
+res.ACP$eig
+```
+
+### 3.1 Eigen Values
+
+Visualización de información de acumulación de la varianza dentro de los componentes generados
+
+```{r}
+fviz_eig(res.ACP, addlabels = TRUE)
+```
+Se procede a realizar el círculo de correlación
+
+### 3.2 Circulo de correlación
+
+Permite realizar la identificación de cómo se correlaciónan las variables estudiadas y cuál es su relación con respectoa  los datos.
+
+```{r}
+##Circulo de correlación (nube de variables)
+fviz_pca_var(res.ACP,
+             col.var = "contrib", # Color by contributions to the PC
+             gradient.cols = c("#FF7F00",  "#034D94"),
+             repel = TRUE     # Avoid text overlapping
+)
+```
+Así mismo, se tiene lo siguiente:
+
+* Tienen una correlación positiva por su cercanía e igual dirección:(Parqueaderos, Preciom), (banios, areaconstr), (habitaciones, tipo vivienda)
+* No hay correlación lineal entre las variables: (estrato, habitaciones), (estrato, tipo vivienda), (piso, preciom)
+* banios y areaconst tienen una mayor contribución y relación en la definición del componente 2
+* Variables que están altamente correlacionadas negativamente: (piso, habitaciones, (piso, tipo vivienda)
+
+
+## 4. Análisis de conglomerados
+
+El análisis de conglomerados busca agrupar las propiedades residenciales en clusters. Esto significa que las propiedades dentro de cada grupo compartirán características similares, como ubicación, tamaño, precio y otras. Al identificar estos grupos, se puede entender mejor las dinámicas de la data y el comportamiento que tienen las agrupaciones.
+
+```{r}
+fviz_nbclust(scale_vivienda, kmeans, method = "wss")
+```
+Usando el elbow method, no se tiene una curva con una relación acentuada en algún cluster específico, así que se decide usar el más central, eligiendo realizar el análisis con cuatro clusters y se procede a realizar la visualización para poder hacer la verificación de resultados
+
+
+```{r}
+cluster_generation <- kmeans(scale_vivienda, centers = 4, nstart = 25)
+
+fviz_cluster(cluster_generation, data = scale_vivienda,
+             geom = "point", stand = FALSE,
+             ellipse = TRUE, show.clust.cent = TRUE)
+```
+Se encuentra que:
+
+Los cluster encontrados tienen una distribución en cuanto a frecuencia muy similar. El primer cluster tiene 2219 observaciones, el segundo tiene 1785, mientras que el tercero tiene 1026 observaciones y el último tiene 3289.
+
+```{r}
+## Se asigna el número del cluster a cada uno de los registros del dataframe
+selected_vivienda$cluster <- as.factor(cluster_generation$cluster)
+
+## Se halla la cantidad y distribución de los cluster
+cat("Distribución de la cantidad de filas por cluster:")
+print(table(selected_vivienda$cluster))
+cat("\n")
+
+## Se genera información relevante para cada uno de los cluster
+interest_vars <- c("preciom", "banios", "estrato", "piso", "areaconst")
+for (clus in 1:4) {
+  cat("Resulados para cluster: ", clus)
+  cat("\n")
+  cluster_info <- subset(selected_vivienda, selected_vivienda$cluster == clus)
+  print(summary(cluster_info[, interest_vars]))
+  cat("\n\n")
+}
+
+```
+
+
+## 5. Análisis de Correspondencia
+
+El análisis de correspondencia busca identificar y visualizar las relaciones entre las variables categóricas de un conjunto de datos. En el contexto de los datos, se espera que este análisis permita descubrir cómo se distribuyen los diferentes tipos de vivienda en las distintas zonas y estratos
+
+```{r}
+cat_vivienda <- table(vivienda$zona, vivienda$estrato)
+cat_vivienda
+
+chisq.test(cat_vivienda)
+```
+Un p-valor menor a 0.05 en un análisis de correspondencia indica que la relación entre las categorías de tipo de vivienda y zona. Esto significa que existe una fuerte asociación entre estas variables. En otras palabras, la distribución de los tipos de vivienda no es uniforme en todas las zonas y barrios, lo que te permite identificar patrones específicos en el mercado inmobiliario.
+
+```{r}
+ cat_vivienda_AC <- CA(cat_vivienda, graph = TRUE)
+```
+Se encuentra lo siguiente:
+
+El análisis nos muestra una relación con respect a los estratos 4 y 5 con la Zona Sur, así como una relación entre el estrato 6 y la Zona Oeste.
+
+
+```{r}
+fviz_screeplot(cat_vivienda_AC, addlabels = TRUE)
+```
+
+
+## 6. Conclusiones
+
+Cada una de las técnicas empleadas ha aportado valiosa información para comprender la estructura y las dinámicas del mercado inmobiliario. El ACP ha permitido reducir la dimensionalidad de los datos y destacar las variables más influyentes, mientras que el análisis de conglomerados ha facilitado la identificación de segmentos homogéneos de propiedades. Por su parte, el análisis de correspondencias ha revelado relaciones significativas entre las variables categóricas, enriqueciendo la comprensión de la distribución espacial de la oferta inmobiliaria.
+
+Haciendo uso de la reducción de la dimensionalidad se logra la visualización de datos multidimensionales, identificación de patrones, mejora de la eficiencia en modelos.Mientras tranto el análisis de Correspondencias sirve para encontrar las relaciones entre variables categóricas, visualización de tablas de contingencia, identificación de asociaciones y patrones, segmentación de datos. El Análisis de Conglomerados identifica grupos homogéneos, segmentación de datos para estrategias personalizadas, descubrimiento de patrones ocultos.
+En conjunto, estos resultados proporcionan una base sólida para la toma de decisiones estratégicas en el sector inmobiliario, permitiendo una mejor comprensión de las preferencias de los consumidores, la identificación de oportunidades de mercado y la optimización de las estrategias de marketing y ventas.
+
+Se llevaron a cabo diversos análisis exploratorios con el objetivo de identificar patrones y relaciones subyacentes en los datos del mercado inmobiliario. A continuación, se presentan las principales conclusiones obtenidas:
+
+* **Análisis de Componentes Principales (ACP)**: Se identificaron diversas relaciones entre las variables analizadas. Observamos una correlación positiva entre variables como parqueaderos y precio, baños y área construida, así como entre habitaciones y tipo de vivienda, lo que sugiere una asociación directa entre ellas. Por otro lado, no se encontró una relación lineal significativa entre estrato y número de habitaciones, estrato y tipo de vivienda, ni entre piso y precio. En cuanto a la contribución a los componentes principales, las variables baños y área construida mostraron una mayor influencia en la definición del segundo componente. Finalmente, se detectó una correlación negativa significativa entre piso y número de habitaciones, así como entre piso y tipo de vivienda, indicando una relación inversa entre estas variables.
+
+* **Análisis de Conglomerados**: A través del análisis de conglomerados, se identificaron cuatro grupos en la base de datos. Estos grupos se caracterizan por presentar diferencias significativas en términos de estrato socioeconómico, área construida y número de habitaciones, lo que permite una segmentación más precisa para lograr ofrecer productos específicos desde la inmobiliaria.
+
+* **Análisis de Correspondencias**: El análisis de correspondencias evidenció una fuerte asociación entre las variables "zona" y "estrato socioeconómico". Esta técnica resultó especialmente útil para explorar las relaciones entre las variables categóricas presentes en la base de datos, permitiendo identificar patrones de distribución y co-ocurrencia entre las diferentes categorías.
