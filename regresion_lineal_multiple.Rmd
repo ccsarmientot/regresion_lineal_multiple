@@ -1,7 +1,7 @@
 ---
-title: 'Actividad 1: Mod. Estad. para la Toma Decisiones'
+title: 'Actividad 2: Mod. Estad. para la Toma Decisiones'
 author: "Cristian Sarmiento"
-date: "2024-08-07"
+date: "2024-08-28"
 output:
   html_document:
     df_print: paged
@@ -19,298 +19,145 @@ library(stargazer)
 library(dplyr)
 library(mice)
 library(visdat)
-library(ggplot2)
+library(plotly)
 library(reshape2)
 data(vivienda)
 ```
 
-## 1. Informe
-
 ### 1.1. Introducción
+El presente informe busca comprender los factores que determinan el precio de una vivienda con ciertas características definidas. De esta forma, la idea es adentrarse en el análisis del precio de viviendas en las zonas norte y sur dependiendo de las necesidades concretas del cliente.
 
-El mercado de viviendas urbanas es un sector complejo y dinámico que se encuentra en constante evolución. Para tener éxito en este mercado, las empresas inmobiliarias necesitan comprender en profundidad las tendencias del mercado, las necesidades de los clientes y la competencia.
+A través de un conjunto de datos denominado "vivienda", que tien información detallada sobre diversas viviendas, este estudio busca identificar la relación entre el precio de la vivienda y las variables de área construida, estrato, número de cuartos, número de parqueaderos, número de baños mediante un modelo de regresión múltiple.
 
-En este informe, se presenta un análisis del mercado de viviendas urbanas en Cali. El análisis se basa en información detallada sobre diversas propiedades residenciales disponibles en el mercado de la ciudad de Cali. Se aplicarán diversas técnicas estadísticas para poder extraer conclusiones relevantes para el cliente.
+### 1.2. Metodología
+Para alcanzar los objetivos planteados, se empleará la siguiente metodología:
 
-## 2. Preprocesamiento de información
+- *Análisis exploratorio de datos:* Se explorarán los datos del conjunto "vivienda" para comprender su distribución, identificar posibles valores atípicos y visualizar la relación entre las variables de interés (precio, área construida, estrato, número de cuartos, número de parqueaderos, número de baños).
+- *Modelado estadístico:* Se aplicará modelo de regresión lineal míltiple para identificar el que mejor se ajuste a los datos y explique la relación entre el precio y las variables en mención.
+- *Evaluación del modelo:* Se evaluará el rendimiento de cada modelo estadístico utilizando métricas adecuadas, como el coeficiente de determinación (R²) y la validación de supuestos estadísticos.
 
-Se realiza un primer análisis exploratorio de la base de datos. Este análisis se estructurará en la identificación de las columnas y dimensiones de la tabla, lo segundo será identificar los tipos de datos de las columnas y seleccionar cuáles serán relevantes para el análisis. Lo tercero será realizar la identificación de valores perdidos dentro de las columnas seleccionadas para el análisis y brindar posibles propuestas para poder solucionar los datos faltantes. Con la realización de estos pasos se puede determinar la relación de algunas variables con respecto a los objetivos del presente informe.
+### 1.3. Resultados
+De acuerdo al estudio realizado, la relación entre el precio de una vivienda estrato 4 en Cali y su área construida, según análisis descriptivos proporcionados en los anexos demuestran una relación positiva y creciente. Lo cual tiene sentido en tanto que a mayor tamaño de vivienda, se espera que su precio sea mayor. El modelo estadístico de regresión lineal simple permitió ajustar el precio de una vivienda con mayor precisión en función de su tamaño, facilitando la toma de decisiones informadas en el mercado inmobiliario local. En la gráfica que se muestra a continuación se puede evidenciar cómo están relacionados los datos y el modelo aplicado sobre los apartamentos de estrato 4 dentro de los datos de muestra:
 
-### 2.1 Cargue de base de datos
+```{r echo=FALSE}
+```
+El en gráfico propuesto se da a conocer gráficamente la relación entre las dos variables de estudio. Como se esperaba, los datos presentan una relación creciente positiva, el modelo propuesto que permite conocer el impacto de cuánto puede llegar a crecer el precio en función del área de un bien. El modelo de regresión lineal sencillo se realizó usando como variable dependiente el precio en millones y el área construida en metros cuadrados como variable independiente o explicativa. Los datos sobre el modelo de regresión utilizado se pueden encontrar en la siguiente tabla:
 
-```{r head_data}
-head(vivienda)
-cat("Cantidad columnas: ", ncol(vivienda), "Cantidad filas: ", nrow(vivienda))
+``` {r echo=FALSE}
+# stargazer(modelo_regresion, type = "text")
 ```
 
-### 2.2 Selección de datos relevantes
+Sobre el modelo de regresión simple, se puede interpretar que el 71.63% de la variabilidad en la variable dependiente (precio en millones) está explicada por la variable independiente (area construida en metros cuadrados). Esto significa que el modelo propuesto captura una porción considerable de la variabilidad en el precio que puede ser atribuida a la relación con el área de construcción de una propiedad. Además, con base en el análisis de los estadísticos de regresión y las pruebas de hipótesis, se puede concluir que los coeficientes del modelo son estadísticamente significativos para el modelo de regresión. Esto implica que las variables independientes correspondientes tienen un efecto significativo en la predicción de la variable dependiente.
 
-Según los objetivos del estudio, se identifican como variables relevantes zona, barrio, tipo como variables categóricas. Para análisis de variables numéricas se selecciona principalmente la variable preciom, como variables para análisis de caraterísticas se seleccionan piso, estrato, areaconst, banios, habitac. A continuación se realiza una verificación de datos categóricos relevantes:
+Es clave también destacar que el modelo propuesto en este análisis cumple con los supuestos de homocedasticidad, autocorrelación y normalidad en los errores. En primer lugar, la homocedasticidad, que implica que la varianza de los errores es constante en todos los niveles de la variable independiente, se verifica mediante pruebas estadísticas adecuadas, como el test de Breusch-Pagan, que no encontró evidencia significativa de heterocedasticidad en los residuos del modelo. Además, la autocorrelación, que indica la falta de independencia entre los errores, se evaluó a través del test de Durbin-Watson, que no encontró evidencia de autocorrelación en los residuos del modelo. Por último, la normalidad en los errores, que supone que los errores se distribuyen normalmente, se verificó mediante el test de Shapiro-Wilk, que no encontró evidencia significativa de desviación de una distribución normal en los residuos del modelo. Estos resultados indican que el modelo de regresión lineal simple utilizado en este análisis satisface los supuestos fundamentales necesarios para realizar inferencias válidas y confiables sobre la relación entre las variables. Los resultados aquí mencionados se pueden validar en la sección 2.7 del apartado de anexos.
 
-```{r selecction_data}
+### 1.4. Conclusiones
+Este informe contribuye a una mejor comprensión de los factores que determinan el precio de las viviendas en Cali, particularmente en el segmento de estrato 4 con un área construida inferior a 200 metros cuadrados. La identificación de un modelo estadístico que describe la relación entre el precio y el área construida permite a los actores del mercado inmobiliario tomar decisiones más acertadas en sus transacciones
 
-# Vector con los nombres de las columnas a analizar
-columnas_interes <- c("zona", "piso", "tipo", "estrato")
+La alta proporción de variabilidad en el precio de una propiedad explicada por el área construida (71.63%) sugiere que el modelo de regresión lineal simple es una herramienta útil para predecir el precio de una propiedad basándose en su área de construcción. Esta relación significativa entre el área construida y el precio proporciona una base sólida para estimar el valor de las propiedades.
 
-# Bucle for para iterar sobre cada columna
-for (columna in columnas_interes) {
-  valores_unicos <- unique(vivienda[[columna]])
-  print(paste0("Valores únicos para ", columna, ": ", paste0(valores_unicos, collapse = ", ")))
-}
-      
-# Generando vector para resumir las columnas seleccionadas
-specific_columns <- c("preciom", "parqueaderos", "areaconst", "banios", "habitaciones")
-summary(vivienda[, specific_columns])
+El hecho de que los coeficientes del modelo sean estadísticamente significativos implica que el área construida tiene un efecto significativo en la predicción del precio de una propiedad. Esto sugiere que, en promedio, por cada unidad adicional de área construida, el precio de la propiedad aumenta o disminuye de manera significativa. Esta información es crucial para los agentes del mercado inmobiliario y los inversores que deseen comprender cómo varía el precio de una propiedad en función de su tamaño.
 
-```
+Dado que el modelo captura una porción considerable de la variabilidad en el precio de una propiedad y los coeficientes son estadísticamente significativos, puede ser una herramienta valiosa para la toma de decisiones en el mercado inmobiliario. Los agentes del mercado, los tasadores de propiedades y los compradores potenciales pueden utilizar este modelo para estimar el precio de las propiedades y tomar decisiones informadas sobre la compra, venta o valoración de bienes raíces.
 
-### 2.3 Limpieza de datos
+\newpage
 
-Se evidencia que vienen valores de id con vacíos, para lo cual es necesario quitarlos de la base de datos:
+## 2. Anexos
 
-```{r clean_data_2}
-faltantes_id = sum(is.na(vivienda$id))
-cat("Cantidad de id faltantes:", faltantes_id)
-## Se remueven los id vacios de la tabla:
-vivienda = subset(vivienda, !is.na(id))
-cat("Nueva cantidad filas: ", nrow(vivienda))
-```
+### 2.1. Filtro a la base de datos (zona norte):
 
-También se realiza la verificación de datos duplicados dentro de la tabla provista:
-
-```{r clean_data_1}
-duplicates <- duplicated(vivienda)
-n_duplicates <- sum(duplicates)
-cat("Cantidad de filas duplicadas: ", n_duplicates)
-
-## Se remueven los duplicados encontrados:
-vivienda <- unique(vivienda)
-cat("Nueva cantidad filas: ", nrow(vivienda))
-```
-
-Con lo identificado en la selección de variables se realiza la limpieza de las columnas de tipo, zona y barrio. Adicionalmente, al haber identificado un valor de "APTO" en la columna zona, esta se unifica con "APARTAMENTO" para normalizar los datos.
-
-```{r clean_data_3}
-
-upper_cols <- c("zona", "barrio", "tipo")
-
-for (col in upper_cols) {
-  vivienda[[col]] <- toupper(vivienda[[col]])
-}
-
-head(vivienda[, upper_cols])
-
-```
-
-### 2.4 Identificación de faltantes
-
-```{r show_faltantes}
-## uses visdat
-vis_miss(vivienda)
-```
-
-Haciendo uso de la librería `visdat` se logra identificar que dentro de la tabla dispuesta, después de la limpieza se tiene 3.9 % de datos faltantes. Todos distribuidos en las columnas `parqueaderos` y `piso`.
-
-```{r show_faltantes_mice}
-## uses visdat
-md.pattern(vivienda, rotate.names = TRUE)
-```
-
-### 2.5 Estrategias para mitigar datos faltantes
-
-La primera posible solución para poder trabajar con los datos de la forma más completa posible puede ser precindir de usar las variables `parqueaderos` y `piso`. Esta estrategia tiene como ventaja que puede ser de las más rápidas de implementar, así como reducir la dimensionalidad de los datos, con lo que aplicar algunos algoritmos puede llegar a ser más eficiente. Así mismo, la reducción de información dentro de la tabla puede generar eliminación de información importante, lo que puede conllevar a presentar sesgo en el resultado.
-
-#### 2.5.1 Análisis de faltantes en la variable PARQUEADEROS
-
+Se procede a realizar un filtro a la base de datos usando la variable `tipo` para verificar las casas y la variable `zona` para identificar las que se encuentran en la Zona Norte. Se hace la visualización de las primeras tres líneas:
 ```{r}
-vivienda %>% count(parqueaderos)
+cond_vector <- (vivienda$tipo == "Casa") & (vivienda$zona == "Zona Norte")
+viviendas_norte <- subset(vivienda, cond_vector)
+head(viviendas_norte, 3)
 ```
 
-Entendiendo el contexto, y que no existen valores de 0 dentro de la información que tenemos, es prudente asumir que existen viviendas que no tienen parqueaderos, por lo cual se procede a inputar el valor de 0 en los missing values
+Así mismo, se realiza la gráfica de los registros con ubicaciones en zona norte, lo que genera como resultado la siguiete imagen, la cual fue realizada utilizando PowerBI:
 
-```{r}
-vivienda <- vivienda %>% mutate(parqueaderos = ifelse(is.na(parqueaderos), 0, parqueaderos))
+```{r echo=FALSE}
+knitr::include_graphics('Data/distribucion_zona_norte.jpg')
 ```
 
-#### 2.5.2 Análisis de faltantes en la variable PISO
+Se evidencia que existen varios registros que están por fuera de la zona norte. Como resultado de este hallazgo, se propone elegir puntos estratégicos con base en la observación de la gráfica y el conocimiento de las zonas, para definir límites estrictos y poder tomar la base de datos de una mejor manera.
 
-Se supone una correlación entre la variable piso con la variable tipo de vivienda. En las variables casa, no tendría sentido tener el piso en el que se encuentra ubicada la casa (como sí lo tendría en un apartamento). Así que se propone realizar la revisión. A menos de que se trate de la cantidad de pisos de una vivienda. Se procede a reemplazar los valores de la mediana por tipo
+Así pues, el filtro arbitrario se generará de la siguiente manera:
 
-```{r}
-# Convertir a numérico
-vivienda$piso <- as.numeric(vivienda$piso)
+* Latitudes mayores a 3.46467 (para sur menores a: 3.40282)
+* Longitudes mayores a -76.5354 
 
-# reemplazar valores por mediana por tipo: CASA
-only_casas <- subset(vivienda, vivienda$tipo == "CASA")
-median_casa_piso = median(only_casas$piso)
-vivienda <- vivienda %>% mutate(piso = ifelse(is.na(piso) & tipo == "CASA", median_casa_piso, piso))
+Para que el nuevo mapa quede de la siguiente manera. Para efectos ilustrativos se están dejando las anteriores categorizaciones de las zonas, aunque para nuestro ejercicio se van a tomar estos puntos como ZONA NORTE:
 
-# reemplazar valores por mediana por tipo: CASA
-only_apto <- subset(vivienda, vivienda$tipo == "APARTAMENTO")
-median_apt_piso = median(only_apto$piso)
-vivienda <- vivienda %>% mutate(piso = ifelse(is.na(piso) & tipo == "APARTAMENTO", median_apt_piso, piso))
-
+```{r echo=FALSE}
+knitr::include_graphics('Data/distribucion_zona_norte_processed.jpg')
 ```
 
-verificación de dataset completo:
-
-```{r}
-## uses visdat
-vis_miss(vivienda)
-```
-
-### 2.6 Correlación de variables:
-
-Encoding de variables para hallar matrices de correlación:
-
-```{r}
-vivienda$zona_num <- as.integer(factor(vivienda$zona))
-vivienda$tipo_num <- as.integer(factor(vivienda$tipo))
-vivienda$barrio_num <- as.integer(factor(vivienda$barrio))
-```
-
-Con el dataframe codificado se procede a realizar una matriz de correlación para hallar la relación entre los valores
+ 
+Por lo tanto, nuestra nueva consulta para trabajo, llamada `viviendas_norte` será la calculada con el siguiente código:
 
 
 ```{r}
-library(psych)
-enc_vivienda <- vivienda[, !names(vivienda) %in% c("barrio", "zona", "tipo")]
-correlacion <- round(cor(enc_vivienda), 1)
-corPlot(correlacion, number.cex = 0.5)
+cond_vector <- (vivienda$tipo == "Casa") & (vivienda$latitud > 3.46467) & (vivienda$longitud > -76.5354)
+viviendas_norte <- subset(vivienda, cond_vector)
+cat("Cantidad columnas: ", ncol(viviendas_norte), "Cantidad filas: ", nrow(viviendas_norte))
+head(viviendas_norte, 3)
 ```
 
-## 3. Análisis de Componentes Principales
-
-El Análisis de Componentes Principales (ACP) es una técnica estadística utilizada en el análisis de datos. Su principal objetivo es reducir la dimensionalidad de un conjunto de datos mientras se conserva la mayor cantidad posible de varianza.
+Se hace el slice por variables de interés para nuestro ejercicio:
 
 ```{r}
-## Se seleccionan las variables que se van a utilizar dentro del ACP
-selected_vars <- c("piso", "estrato", "preciom", "areaconst", "parqueaderos", "banios","habitaciones", "zona_num", "tipo_num")
-selected_vivienda <- vivienda[, selected_vars]
-
-## Reescalar las variables seleccionadas
-scale_vivienda <- scale(selected_vivienda)
+interest_cols <- c("preciom", "areaconst", "estrato", "banios", "habitaciones")
+viviendas_norte <- viviendas_norte[, interest_cols] 
+viviendas_norte
 ```
 
-Generación de los componentes principales haciendo uso de la librería `PCA`
+
+### 2.2. Análisis exploratorio:
+
+Análisis exploratorio de datos, enfocado en la relación entre la variable respuesta (precio) en función de las variables predictoras (área construida, estrato, número de cuartos, número de parqueaderos, número de baños)
+
+Boxplot para verificar la relación entre el `estrato` (variable categórica ordinal) y `preciom`:
 
 ```{r}
-library(FactoMineR)
-library(factoextra)
-res.ACP <- PCA(scale_vivienda, graph = FALSE)
 
-## Verficación de valores propios
-res.ACP$eig
+# Se convierte estrato a un factor para evitar que se considere una variable numérica
+viviendas_norte$estrato <- factor(viviendas_norte$estrato)
+
+# Create box plot
+plot <- plot_ly(viviendas_norte, x = ~estrato, y = ~preciom, type = 'box') %>%
+  layout(title = "Precio vs. Estrato")
+
+plot
 ```
 
-### 3.1 Eigen Values
 
-Visualización de información de acumulación de la varianza dentro de los componentes generados
+
+Gráfico de dispersión para visualizar la relación entre el área construida y el precio de la vivienda
 
 ```{r}
-fviz_eig(res.ACP, addlabels = TRUE)
-```
-Se procede a realizar el círculo de correlación
+# Crear un gráfico de dispersión de precio vs. área construida
+plot <- plot_ly(viviendas_norte, x = ~areaconst, y = ~preciom,
+                type = 'scatter', mode = 'markers',
+                marker = list(color = 'blue'))
 
-### 3.2 Circulo de correlación
+# Agregar título y etiquetas
+plot <- plot %>% layout(title = "Relación entre Precio y Área Construida",
+                       xaxis = list(title = "Área Construida"),
+                       yaxis = list(title = "Precio"))
 
-Permite realizar la identificación de cómo se correlaciónan las variables estudiadas y cuál es su relación con respectoa  los datos.
-
-```{r}
-##Circulo de correlación (nube de variables)
-fviz_pca_var(res.ACP,
-             col.var = "contrib", # Color by contributions to the PC
-             gradient.cols = c("#FF7F00",  "#034D94"),
-             repel = TRUE     # Avoid text overlapping
-)
-```
-Así mismo, se tiene lo siguiente:
-
-* Tienen una correlación positiva por su cercanía e igual dirección:(Parqueaderos, Preciom), (banios, areaconstr), (habitaciones, tipo vivienda)
-* No hay correlación lineal entre las variables: (estrato, habitaciones), (estrato, tipo vivienda), (piso, preciom)
-* banios y areaconst tienen una mayor contribución y relación en la definición del componente 2
-* Variables que están altamente correlacionadas negativamente: (piso, habitaciones, (piso, tipo vivienda)
-
-
-## 4. Análisis de conglomerados
-
-El análisis de conglomerados busca agrupar las propiedades residenciales en clusters. Esto significa que las propiedades dentro de cada grupo compartirán características similares, como ubicación, tamaño, precio y otras. Al identificar estos grupos, se puede entender mejor las dinámicas de la data y el comportamiento que tienen las agrupaciones.
-
-```{r}
-fviz_nbclust(scale_vivienda, kmeans, method = "wss")
-```
-Usando el elbow method, no se tiene una curva con una relación acentuada en algún cluster específico, así que se decide usar el más central, eligiendo realizar el análisis con cuatro clusters y se procede a realizar la visualización para poder hacer la verificación de resultados
-
-
-```{r}
-cluster_generation <- kmeans(scale_vivienda, centers = 4, nstart = 25)
-
-fviz_cluster(cluster_generation, data = scale_vivienda,
-             geom = "point", stand = FALSE,
-             ellipse = TRUE, show.clust.cent = TRUE)
-```
-Se encuentra que:
-
-Los cluster encontrados tienen una distribución en cuanto a frecuencia muy similar. El primer cluster tiene 2219 observaciones, el segundo tiene 1785, mientras que el tercero tiene 1026 observaciones y el último tiene 3289.
-
-```{r}
-## Se asigna el número del cluster a cada uno de los registros del dataframe
-selected_vivienda$cluster <- as.factor(cluster_generation$cluster)
-
-## Se halla la cantidad y distribución de los cluster
-cat("Distribución de la cantidad de filas por cluster:")
-print(table(selected_vivienda$cluster))
-cat("\n")
-
-## Se genera información relevante para cada uno de los cluster
-interest_vars <- c("preciom", "banios", "estrato", "piso", "areaconst")
-for (clus in 1:4) {
-  cat("Resulados para cluster: ", clus)
-  cat("\n")
-  cluster_info <- subset(selected_vivienda, selected_vivienda$cluster == clus)
-  print(summary(cluster_info[, interest_vars]))
-  cat("\n\n")
-}
-
+plot
 ```
 
 
-## 5. Análisis de Correspondencia
 
-El análisis de correspondencia busca identificar y visualizar las relaciones entre las variables categóricas de un conjunto de datos. En el contexto de los datos, se espera que este análisis permita descubrir cómo se distribuyen los diferentes tipos de vivienda en las distintas zonas y estratos
+Matriz de correlación para realizar una visualización de la interacción de las variables con respecto a nuestra variable objetivo (preciom) y entre dependientes:
+``` {r}
+# Crear una matriz de correlación excluyendo "estrato"
+corr_matrix <- cor(viviendas_norte[, -which(names(viviendas_norte) == "estrato")])
 
-```{r}
-cat_vivienda <- table(vivienda$zona, vivienda$estrato)
-cat_vivienda
-
-chisq.test(cat_vivienda)
-```
-Un p-valor menor a 0.05 en un análisis de correspondencia indica que la relación entre las categorías de tipo de vivienda y zona. Esto significa que existe una fuerte asociación entre estas variables. En otras palabras, la distribución de los tipos de vivienda no es uniforme en todas las zonas y barrios, lo que te permite identificar patrones específicos en el mercado inmobiliario.
-
-```{r}
- cat_vivienda_AC <- CA(cat_vivienda, graph = TRUE)
-```
-Se encuentra lo siguiente:
-
-El análisis nos muestra una relación con respect a los estratos 4 y 5 con la Zona Sur, así como una relación entre el estrato 6 y la Zona Oeste.
-
-
-```{r}
-fviz_screeplot(cat_vivienda_AC, addlabels = TRUE)
+# Visualizar la matriz de correlación como un mapa de calor
+plot_ly(z = corr_matrix, x = colnames(corr_matrix), y = colnames(corr_matrix),
+        type = "heatmap", colorscale = "Inferno") %>%
+  layout(title = "Matriz de Correlación")
 ```
 
-
-## 6. Conclusiones
-
-Cada una de las técnicas empleadas ha aportado valiosa información para comprender la estructura y las dinámicas del mercado inmobiliario. El ACP ha permitido reducir la dimensionalidad de los datos y destacar las variables más influyentes, mientras que el análisis de conglomerados ha facilitado la identificación de segmentos homogéneos de propiedades. Por su parte, el análisis de correspondencias ha revelado relaciones significativas entre las variables categóricas, enriqueciendo la comprensión de la distribución espacial de la oferta inmobiliaria.
-
-Haciendo uso de la reducción de la dimensionalidad se logra la visualización de datos multidimensionales, identificación de patrones, mejora de la eficiencia en modelos.Mientras tranto el análisis de Correspondencias sirve para encontrar las relaciones entre variables categóricas, visualización de tablas de contingencia, identificación de asociaciones y patrones, segmentación de datos. El Análisis de Conglomerados identifica grupos homogéneos, segmentación de datos para estrategias personalizadas, descubrimiento de patrones ocultos.
-En conjunto, estos resultados proporcionan una base sólida para la toma de decisiones estratégicas en el sector inmobiliario, permitiendo una mejor comprensión de las preferencias de los consumidores, la identificación de oportunidades de mercado y la optimización de las estrategias de marketing y ventas.
-
-Se llevaron a cabo diversos análisis exploratorios con el objetivo de identificar patrones y relaciones subyacentes en los datos del mercado inmobiliario. A continuación, se presentan las principales conclusiones obtenidas:
-
-* **Análisis de Componentes Principales (ACP)**: Se identificaron diversas relaciones entre las variables analizadas. Observamos una correlación positiva entre variables como parqueaderos y precio, baños y área construida, así como entre habitaciones y tipo de vivienda, lo que sugiere una asociación directa entre ellas. Por otro lado, no se encontró una relación lineal significativa entre estrato y número de habitaciones, estrato y tipo de vivienda, ni entre piso y precio. En cuanto a la contribución a los componentes principales, las variables baños y área construida mostraron una mayor influencia en la definición del segundo componente. Finalmente, se detectó una correlación negativa significativa entre piso y número de habitaciones, así como entre piso y tipo de vivienda, indicando una relación inversa entre estas variables.
-
-* **Análisis de Conglomerados**: A través del análisis de conglomerados, se identificaron cuatro grupos en la base de datos. Estos grupos se caracterizan por presentar diferencias significativas en términos de estrato socioeconómico, área construida y número de habitaciones, lo que permite una segmentación más precisa para lograr ofrecer productos específicos desde la inmobiliaria.
-
-* **Análisis de Correspondencias**: El análisis de correspondencias evidenció una fuerte asociación entre las variables "zona" y "estrato socioeconómico". Esta técnica resultó especialmente útil para explorar las relaciones entre las variables categóricas presentes en la base de datos, permitiendo identificar patrones de distribución y co-ocurrencia entre las diferentes categorías.
