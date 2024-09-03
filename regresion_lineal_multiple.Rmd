@@ -37,26 +37,24 @@ Para alcanzar los objetivos planteados, se empleará la siguiente metodología:
 - *Evaluación del modelo:* Se evaluará el rendimiento de cada modelo estadístico utilizando métricas adecuadas, como el coeficiente de determinación (R²) y la validación de supuestos estadísticos.
 
 ### 1.3. Resultados
-De acuerdo al estudio realizado, la relación entre el precio de una vivienda estrato 4 en Cali y su área construida, según análisis descriptivos proporcionados en los anexos demuestran una relación positiva y creciente. Lo cual tiene sentido en tanto que a mayor tamaño de vivienda, se espera que su precio sea mayor. El modelo estadístico de regresión lineal simple permitió ajustar el precio de una vivienda con mayor precisión en función de su tamaño, facilitando la toma de decisiones informadas en el mercado inmobiliario local. En la gráfica que se muestra a continuación se puede evidenciar cómo están relacionados los datos y el modelo aplicado sobre los apartamentos de estrato 4 dentro de los datos de muestra:
+De acuerdo al estudio realizado, la relación entre el precio de una vivienda estrato en Cali y su área construida, estrato, número de cuartos, número de parqueaderos, número de baños, según análisis descriptivos proporcionados en los anexos demuestran una relación prevalente entre las variables del análsis y la variable de precio. Lo cual tiene sentido en tanto que a mayor tamaño de vivienda, se espera que su precio sea mayor, igualmente entre el estrato, la cantidad de baños y la cantidad de parqueaderos. El modelo estadístico de regresión lineal multiple permitió ajustar el precio de una vivienda con mayor precisión en función de varias de sus características, facilitando establecer las dos opciones de el mercado inmobiliario local para las ofertas que se recibieron. En la gráfica que se muestra a continuación se puede evidenciar cómo están relacionados los datos y los resultados para los modelos aplicados, siendo (1) el modelo original para casas de zona norte, (2) el modelo para casas de zona norte usando train-test split, (3) el modelo original para apartamentos en zona sur y (4) el modelo usando train-test split para apartamentos en la zona sur.
+
 
 ```{r echo=FALSE}
-```
-El en gráfico propuesto se da a conocer gráficamente la relación entre las dos variables de estudio. Como se esperaba, los datos presentan una relación creciente positiva, el modelo propuesto que permite conocer el impacto de cuánto puede llegar a crecer el precio en función del área de un bien. El modelo de regresión lineal sencillo se realizó usando como variable dependiente el precio en millones y el área construida en metros cuadrados como variable independiente o explicativa. Los datos sobre el modelo de regresión utilizado se pueden encontrar en la siguiente tabla:
-
-``` {r echo=FALSE}
-# stargazer(modelo_regresion, type = "text")
+knitr::include_graphics('Data/resultados_modelos.jpg')
 ```
 
-Sobre el modelo de regresión simple, se puede interpretar que el 71.63% de la variabilidad en la variable dependiente (precio en millones) está explicada por la variable independiente (area construida en metros cuadrados). Esto significa que el modelo propuesto captura una porción considerable de la variabilidad en el precio que puede ser atribuida a la relación con el área de construcción de una propiedad. Además, con base en el análisis de los estadísticos de regresión y las pruebas de hipótesis, se puede concluir que los coeficientes del modelo son estadísticamente significativos para el modelo de regresión. Esto implica que las variables independientes correspondientes tienen un efecto significativo en la predicción de la variable dependiente.
 
-Es clave también destacar que el modelo propuesto en este análisis cumple con los supuestos de homocedasticidad, autocorrelación y normalidad en los errores. En primer lugar, la homocedasticidad, que implica que la varianza de los errores es constante en todos los niveles de la variable independiente, se verifica mediante pruebas estadísticas adecuadas, como el test de Breusch-Pagan, que no encontró evidencia significativa de heterocedasticidad en los residuos del modelo. Además, la autocorrelación, que indica la falta de independencia entre los errores, se evaluó a través del test de Durbin-Watson, que no encontró evidencia de autocorrelación en los residuos del modelo. Por último, la normalidad en los errores, que supone que los errores se distribuyen normalmente, se verificó mediante el test de Shapiro-Wilk, que no encontró evidencia significativa de desviación de una distribución normal en los residuos del modelo. Estos resultados indican que el modelo de regresión lineal simple utilizado en este análisis satisface los supuestos fundamentales necesarios para realizar inferencias válidas y confiables sobre la relación entre las variables. Los resultados aquí mencionados se pueden validar en la sección 2.7 del apartado de anexos.
+Sobre el modelo de regresión, se puede interpretar que aproxiamdamente y en promedio el 70 % de la variabilidad en la variable dependiente (precio en millones) está explicada por las variables independientes (area construida en metros cuadrados, estrato, número de cuartos, número de parqueaderos, número de baños). Esto significa que el modelo propuesto captura una porción considerable de la variabilidad en el precio que puede ser atribuida a la relación con las variables independientes o características de una propiedad. Además, con base en el análisis de los estadísticos de regresión y las pruebas de hipótesis, se puede concluir que los coeficientes de los modelos son estadísticamente significativos para realizar las regresiones múltiples. Esto implica que las variables independientes correspondientes tienen un efecto significativo en la predicción de la variable dependiente.
+
+Es clave también destacar que ninguno de los modelo propuestos en este análisis cumple con los supuestos de homocedasticidad, autocorrelación y normalidad en los errores. En primer lugar, la homocedasticidad, que implica que la varianza de los errores es constante en todos los niveles de la variable independiente, se verifica mediante pruebas estadísticas adecuadas, como el test de Breusch-Pagan, que no encontró evidencia significativa de homoscedasticidad en los residuos del modelo. Además, la autocorrelación, que indica la falta de independencia entre los errores, se evaluó a través del test de Durbin-Watson, que encontró evidencia de autocorrelación en los residuos del modelo. Por último, la normalidad en los errores, que supone que los errores se distribuyen normalmente, se verificó mediante el test de Shapiro-Wilk, que también encontró evidencia significativa de desviación de una distribución normal en los residuos del modelo. Estos resultados indican que el modelo de regresión lineal simple utilizado en este análisis NO satisface los supuestos fundamentales necesarios para realizar inferencias válidas y confiables sobre la relación entre las variables. Los resultados aquí mencionados se pueden validar en la sección 2.4 y 3.4 del apartado de anexos.
 
 ### 1.4. Conclusiones
-Este informe contribuye a una mejor comprensión de los factores que determinan el precio de las viviendas en Cali, particularmente en el segmento de estrato 4 con un área construida inferior a 200 metros cuadrados. La identificación de un modelo estadístico que describe la relación entre el precio y el área construida permite a los actores del mercado inmobiliario tomar decisiones más acertadas en sus transacciones
+Este informe contribuye a una mejor comprensión de los factores que determinan el precio de las viviendas en Cali, particularmente en el segmento de casas en zona norte y apartamentos en zona sur. La identificación de un modelo estadístico que describe la relación entre el precio, el área construida, , estrato, número de cuartos, número de parqueaderos y número de baños permitiría tomar mejores decisiones con respecto a la elección de viviendas.
 
-La alta proporción de variabilidad en el precio de una propiedad explicada por el área construida (71.63%) sugiere que el modelo de regresión lineal simple es una herramienta útil para predecir el precio de una propiedad basándose en su área de construcción. Esta relación significativa entre el área construida y el precio proporciona una base sólida para estimar el valor de las propiedades.
+La alta proporción de variabilidad en el precio de una propiedad explicada por las variables independientes del modelo, en promedio un 70 % para los cuatro modelos probados en este documento. Lo que sugiere que el modelo de regresión lineal es una herramienta útil para predecir el precio de una propiedad basándose en su área, estrato, número de cuartos, número de parqueaderos, número de baños. Esta relación significativa entre las variables independientes y el precio proporciona una base sólida para estimar el valor de las propiedades.
 
-El hecho de que los coeficientes del modelo sean estadísticamente significativos implica que el área construida tiene un efecto significativo en la predicción del precio de una propiedad. Esto sugiere que, en promedio, por cada unidad adicional de área construida, el precio de la propiedad aumenta o disminuye de manera significativa. Esta información es crucial para los agentes del mercado inmobiliario y los inversores que deseen comprender cómo varía el precio de una propiedad en función de su tamaño.
+El hecho de que los coeficientes del modelo sean estadísticamente significativos implica que las variables de análisis tienen un efecto significativo en la predicción del precio de una propiedad. Esto sugiere que, en promedio, por cada metro cuadrado adicional de área construida, el precio de la vivienda aumenta en promedio 1.6469 unidades monetarias en el caso del tercer modelo probado. Esta información es útil para comprender cómo varía el precio de una propiedad en función de sus características.
 
 Dado que el modelo captura una porción considerable de la variabilidad en el precio de una propiedad y los coeficientes son estadísticamente significativos, puede ser una herramienta valiosa para la toma de decisiones en el mercado inmobiliario. Los agentes del mercado, los tasadores de propiedades y los compradores potenciales pueden utilizar este modelo para estimar el precio de las propiedades y tomar decisiones informadas sobre la compra, venta o valoración de bienes raíces.
 
@@ -329,7 +327,7 @@ Por lo tanto, nuestra nueva consulta para trabajo, llamada `viviendas_sur` será
 cond_vector <- (vivienda$tipo == "Apartamento") & (vivienda$latitud < 3.40282)
 viviendas_sur <- subset(vivienda, cond_vector)
 cat("Cantidad columnas: ", ncol(viviendas_sur), "Cantidad filas: ", nrow(viviendas_sur))
-head(viviendas_sur, 3)
+tail(viviendas_sur, 3)
 ```
 
 Se hace el slice por variables de interés para nuestro ejercicio:
@@ -467,8 +465,8 @@ hist(res, main = "Histograma de Residuos")
 ```
 Como se puede observar en las gráficas, los datos no siguen una distribución normal, la distribución de los datos es asimétrica y presenta colas más pesadas o más ligeras que una distribución normal. Además, la distribución es no lineal, sino que la relación entre los cuantiles de los datos y los cuantiles de una distribución normal no es lineal, sino que sigue un patrón curvilíneo.
 
-### 3.5. Predicción usando las características de la primera solicitud:
-Con el modelo identificado debe predecir el precio de la vivienda con las características de la primera solicitud:
+### 3.5. Predicción usando las características de la segunda solicitud:
+Con el modelo identificado debe predecir el precio del apartamento con las características de la segunda solicitud:
 
 ```{r}
 data_to_pred <- data.frame(
@@ -519,12 +517,4 @@ mae <- mean(predicciones - test_data$preciom)
 cat("Error Absoluto Medio (MAE):", mae, "\n")
 ```
 Un Error Absoluto Medio (MAE) de 12.82 millones de pesos en un modelo de predicción significa que, en promedio, las predicciones de están desviadas de los precios reales en 12.82 millones de pesos. Es decir, si se toma la diferencia absoluta entre el precio real de una vivienda y el precio que el modelo predice para esa misma vivienda, y  se calcula el promedio de todas esas diferencias se obtiene el valor de 13 millones de pesos.
-
-
-
-```{r}
-stargazer(reg_model, model_test, reg_model_sur, model_test_sur, type="text")
-```
-
-
 
